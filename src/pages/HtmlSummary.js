@@ -63,6 +63,10 @@ class CloudModelSummary extends BaseWizardPage {
   }
 
   render_servers = (servers) => {
+    if (servers.length == 0) {
+      return (<td>&nbsp;</td>);
+    }
+
     const hosts = servers.map(server => {
       const href = "Servers/" + this.server_by_hostname[server]['id'] + ".html";
       return (<div><a href={href}>{server}</a></div>);
@@ -115,11 +119,20 @@ class CloudModelSummary extends BaseWizardPage {
     }
 
     const zones = Array.from(cp_zones).sort().map(zone => {
-      const zone_servers = Object.values(clusters).map(cluster =>
+      const cluster_servers = Object.values(clusters).map(cluster =>
         this.render_servers(cluster['failure_zones'][zone] || [])
       );
 
-      return (<tr key={zone}><td>{zone}</td>{zone_servers}</tr>);
+      const resource_servers = Object.values(resources).map(resource =>
+        this.render_servers(resource['failure_zones'][zone] || [])
+      );
+
+      return (
+        <tr key={zone}>
+          <td>{zone}</td>
+          {cluster_servers}
+          {resource_servers}
+        </tr>);
     });
 
     return (
@@ -128,6 +141,7 @@ class CloudModelSummary extends BaseWizardPage {
         <h2>{cp_name}</h2>
         <table>
           <thead><tr>
+            <th />
             <th colSpan={num_clusters}>Clusters</th>
             <th colSpan={num_resources}>Resources</th>
             <th colSpan={num_load_balancers}>Load Balancers</th>
