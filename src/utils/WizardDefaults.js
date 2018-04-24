@@ -16,6 +16,7 @@ import CloudModelPicker from '../pages/CloudModelPicker';
 import CloudModelSummary from '../pages/CloudModelSummary';
 import AssignServerRoles from '../pages/AssignServerRoles';
 import Complete from '../pages/Complete';
+import HtmlSummary from '../pages/HtmlSummary';
 import InstallIntro from '../pages/InstallIntro';
 import ConfigPage from '../pages/ValidateConfigFiles';
 import CloudDeployProgress from '../pages/CloudDeployProgress';
@@ -34,6 +35,9 @@ export const pages = [{
 }, {
   name: 'CloudModelPicker',
   component: CloudModelPicker
+}, {
+  name: 'HtmlSummary',
+  component: HtmlSummary,
 }, {
   name: 'CloudModelSummary',
   component: CloudModelSummary
