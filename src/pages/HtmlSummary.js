@@ -34,11 +34,12 @@ class CloudModelSummary extends BaseWizardPage {
   init = () => {
     if (this.state.model) {
       this.cloud_internal = this.state.model['internal'];
-      this.control_planes = this.cloud_internal['control-planes'];
+      this.cp_topology = this.cloud_internal['cp-topology'];
+      this.control_planes = this.cp_topology['control_planes'];
       this.servers = this.cloud_internal['servers'];
 
-      for (const s in this.servers) {
-        if (this.servers['hostname']) {
+      for (const s of this.servers) {
+        if (s['hostname']) {
           this.server_by_hostname[s['hostname']] = s;
         }
       }
@@ -61,6 +62,14 @@ class CloudModelSummary extends BaseWizardPage {
       });
   }
 
+  render_servers = (servers) => {
+    const hosts = servers.map(server => {
+      const href = "Servers/" + this.server_by_hostname[server]['id'] + ".html";
+      return (<div><a href={href}>{server}</a></div>);
+    });
+    return (<td>{hosts}</td>);
+  }
+
   render_control_plane = (cp_name, cp_topology) => {
     let num_clusters = 0;
     let num_resources = 0;
@@ -69,51 +78,49 @@ class CloudModelSummary extends BaseWizardPage {
     let service_list = new Set();
     let cp_zones = new Set();
 
+    const clusters = cp_topology['clusters'] || {};
+    const resources = cp_topology['resources'] || {};
+    const load_balancers = cp_topology['load-balancers'] || {};
+
     // Can generalize this logic
-    if ('clusters' in cp_topology) {
-      const clusters = cp_topology['clusters'];
-      num_clusters = Object.keys(clusters).length;
 
-      for (const [name, data] of Object.entries(clusters)) {
-        for (const zone in data['failure_zones'] || {}) {
-          cp_zones.add(zone);
-        }
-        for (const service in data['services'] || {}) {
-          service_list.add(service);
-        }
+    num_clusters = Object.keys(clusters).length;
+    for (const [name, data] of Object.entries(clusters)) {
+      for (const zone in data['failure_zones'] || {}) {
+        cp_zones.add(zone);
+      }
+      for (const service in data['services'] || {}) {
+        service_list.add(service);
       }
     }
 
-    if ('resources' in cp_topology) {
-      const resources = cp_topology['resources'];
-      num_resources = Object.keys(resources).length;
-
-      for (const [name, data] of Object.entries(resources)) {
-        for (const zone in data['failure_zones'] || {}) {
-          cp_zones.add(zone);
-        }
-        for (const service in data['services'] || {}) {
-          service_list.add(service);
-        }
+    num_resources = Object.keys(resources).length;
+    for (const [name, data] of Object.entries(resources)) {
+      for (const zone in data['failure_zones'] || {}) {
+        cp_zones.add(zone);
+      }
+      for (const service in data['services'] || {}) {
+        service_list.add(service);
       }
     }
 
-    if ('load-balancers' in cp_topology) {
-      const load_balancers = cp_topology['load-balancers'];
-      num_load_balancers = Object.keys(load_balancers).length;
-
-      for (const [name, data] of Object.entries(load_balancers)) {
-        for (const zone in data['failure_zones'] || {}) {
-          cp_zones.add(zone);
-        }
-        for (const service in data['services'] || {}) {
-          service_list.add(service);
-        }
+    num_load_balancers = Object.keys(load_balancers).length;
+    for (const [name, data] of Object.entries(load_balancers)) {
+      for (const zone in data['failure_zones'] || {}) {
+        cp_zones.add(zone);
+      }
+      for (const service in data['services'] || {}) {
+        service_list.add(service);
       }
     }
 
-    const zones = Array.from(cp_zones).sort().map(zone =>
-      <tr key={zone}><td>{zone}</td></tr>);
+    const zones = Array.from(cp_zones).sort().map(zone => {
+      const zone_servers = Object.values(clusters).map(cluster =>
+        this.render_servers(cluster['failure_zones'][zone] || [])
+      );
+
+      return (<tr key={zone}><td>{zone}</td>{zone_servers}</tr>);
+    });
 
     return (
       <div key={cp_name}>
