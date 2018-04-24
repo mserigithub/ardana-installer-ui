@@ -22,19 +22,39 @@ class CloudModelSummary extends BaseWizardPage {
     super(props);
 
     this.state = {
-      controlPlane: undefined
+      model: undefined
     };
 
+    this.cloud_internal = undefined;
+    this.control_planes = undefined;
+    this.servers = undefined;
+    this.server_by_hostname = {};
+  }
+
+  init = () => {
+    if (this.state.model) {
+      this.cloud_internal = this.state.model['internal'];
+      this.control_planes = this.cloud_internal['control-planes'];
+      this.servers = this.cloud_internal['servers'];
+
+      for (const s in this.servers) {
+        if (this.servers['hostname']) {
+          this.server_by_hostname[s['hostname']] = s;
+        }
+      }
+    }
   }
 
   componentWillMount() {
     this.setState({loading: true});
 
     // Load overview for all templates
-    fetchJson('/api/v1/clm/model/cp_output/control_plane_topology.yml')
+    fetchJson('/api/v1/clm/model/cp_output/CloudModel.yml')
       .then((yml) => {
+
+        // Force a re-render
         this.setState({
-          controlPlane: yml});
+          model: yml});
       })
       .catch((error) => {
         console.log(error);
@@ -115,11 +135,11 @@ class CloudModelSummary extends BaseWizardPage {
 
   render () {
 
-    let control_planes = undefined;
-
-    if (this.state.controlPlane) {
-      control_planes = Object.keys(this.state.controlPlane['control_planes']).sort().map(name =>
-        this.render_control_plane(name, this.state.controlPlane['control_planes'][name]));
+    let control_planes;
+    if (this.state.model) {
+      this.init();
+      control_planes = Object.keys(this.control_planes).sort().map(name =>
+        this.render_control_plane(name, this.control_planes[name]));
     }
 
     return (
