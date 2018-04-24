@@ -16,7 +16,6 @@ import React from 'react';
 import '../Deployer.css';
 import { fetchJson } from '../utils/RestUtils.js';
 import BaseWizardPage from './BaseWizardPage.js';
-import { translate } from '../localization/localize.js';
 
 class CloudModelSummary extends BaseWizardPage {
   constructor(props) {
@@ -42,9 +41,6 @@ class CloudModelSummary extends BaseWizardPage {
       });
   }
 
-  //
-  // Note: to sort an array need to do: Array.from(s).sort()
-  //
   render_control_plane = (cp_name, cp_topology) => {
     let num_clusters = 0;
     let num_resources = 0;
@@ -53,26 +49,51 @@ class CloudModelSummary extends BaseWizardPage {
     let service_list = new Set();
     let cp_zones = new Set();
 
+    // Can generalize this logic
     if ('clusters' in cp_topology) {
-      const clusters = cp_topology['clusters']);
+      const clusters = cp_topology['clusters'];
       num_clusters = Object.keys(clusters).length;
 
       for (const [name, data] of Object.entries(clusters)) {
-        for (const zone in data['failure_zones'] || {} {
+        for (const zone in data['failure_zones'] || {}) {
           cp_zones.add(zone);
-          service_list
+        }
+        for (const service in data['services'] || {}) {
+          service_list.add(service);
         }
       }
     }
 
     if ('resources' in cp_topology) {
-      num_resources = Object.keys(cp_topology['resources']).length;
+      const resources = cp_topology['resources'];
+      num_resources = Object.keys(resources).length;
+
+      for (const [name, data] of Object.entries(resources)) {
+        for (const zone in data['failure_zones'] || {}) {
+          cp_zones.add(zone);
+        }
+        for (const service in data['services'] || {}) {
+          service_list.add(service);
+        }
+      }
     }
 
     if ('load-balancers' in cp_topology) {
-      num_resources = Object.keys(cp_topology['load-balancers']).length;
+      const load_balancers = cp_topology['load-balancers'];
+      num_load_balancers = Object.keys(load_balancers).length;
+
+      for (const [name, data] of Object.entries(load_balancers)) {
+        for (const zone in data['failure_zones'] || {}) {
+          cp_zones.add(zone);
+        }
+        for (const service in data['services'] || {}) {
+          service_list.add(service);
+        }
+      }
     }
 
+    const zones = Array.from(cp_zones).sort().map(zone =>
+      <tr key={zone}><td>{zone}</td></tr>);
 
     return (
       <div key={cp_name}>
@@ -85,10 +106,11 @@ class CloudModelSummary extends BaseWizardPage {
             <th colSpan={num_load_balancers}>Load Balancers</th>
           </tr></thead>
           <tbody>
+            {zones}
           </tbody>
         </table>
       </div>
-   );
+    );
   }
 
   render () {
