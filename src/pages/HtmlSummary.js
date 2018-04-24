@@ -29,6 +29,7 @@ class CloudModelSummary extends BaseWizardPage {
     this.control_planes = undefined;
     this.servers = undefined;
     this.server_by_hostname = {};
+
   }
 
   init = () => {
@@ -58,7 +59,7 @@ class CloudModelSummary extends BaseWizardPage {
           model: yml});
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
   }
 
@@ -68,7 +69,7 @@ class CloudModelSummary extends BaseWizardPage {
     }
 
     const hosts = servers.map(server => {
-      const href = "Servers/" + this.server_by_hostname[server]['id'] + ".html";
+      const href = 'Servers/' + this.server_by_hostname[server]['id'] + '.html';
       return (<div><a href={href}>{server}</a></div>);
     });
     return (<td>{hosts}</td>);
@@ -79,7 +80,7 @@ class CloudModelSummary extends BaseWizardPage {
     let num_resources = 0;
     let num_load_balancers = 0;
 
-    let service_list = new Set();
+    let services = new Set();
     let cp_zones = new Set();
 
     const clusters = cp_topology['clusters'] || {};
@@ -89,36 +90,59 @@ class CloudModelSummary extends BaseWizardPage {
     // Can generalize this logic
 
     num_clusters = Object.keys(clusters).length;
+    let cluster_names = [];
     for (const [name, data] of Object.entries(clusters)) {
       for (const zone in data['failure_zones'] || {}) {
         cp_zones.add(zone);
       }
       for (const service in data['services'] || {}) {
-        service_list.add(service);
+        services.add(service);
       }
+      cluster_names.push(name);
     }
+    cluster_names.sort();
 
     num_resources = Object.keys(resources).length;
+    let resource_names = [];
     for (const [name, data] of Object.entries(resources)) {
       for (const zone in data['failure_zones'] || {}) {
         cp_zones.add(zone);
       }
       for (const service in data['services'] || {}) {
-        service_list.add(service);
+        services.add(service);
       }
+      resource_names.push(name);
     }
+    resource_names.sort();
 
     num_load_balancers = Object.keys(load_balancers).length;
+    let lb_names = [];
     for (const [name, data] of Object.entries(load_balancers)) {
       for (const zone in data['failure_zones'] || {}) {
         cp_zones.add(zone);
       }
       for (const service in data['services'] || {}) {
-        service_list.add(service);
+        services.add(service);
       }
+      lb_names.push(name);
     }
+    lb_names.sort();
 
-    const zones = Array.from(cp_zones).sort().map(zone => {
+    const list_separately = ['foundation', 'clients', 'ardana'];
+    const separate_set = new Set(this.list_separately);
+
+    // Create a sorted list of those items in the services set, with the items in
+    // list_separately placed at the end of the list
+    const service_list = Array.from(new Set(
+      [...services].filter(x => !separate_set.has(x))
+    )).concat(list_separately);
+
+    const names = cluster_names.map(name => <th>{name}</th>).concat(
+      resource_names.map(name => <th>{name}</th>)).concat(
+      lb_names.map(name => <th>{name}</th>));
+
+
+    const zone_rows = Array.from(cp_zones).sort().map(zone => {
       const cluster_servers = Object.values(clusters).map(cluster =>
         this.render_servers(cluster['failure_zones'][zone] || [])
       );
@@ -147,7 +171,8 @@ class CloudModelSummary extends BaseWizardPage {
             <th colSpan={num_load_balancers}>Load Balancers</th>
           </tr></thead>
           <tbody>
-            {zones}
+            <tr><td>&nbsp;</td>{names}</tr>
+            {zone_rows}
           </tbody>
         </table>
       </div>
