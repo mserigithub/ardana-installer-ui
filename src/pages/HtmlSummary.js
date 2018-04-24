@@ -42,7 +42,53 @@ class CloudModelSummary extends BaseWizardPage {
       });
   }
 
-  render_control_plane = (name, contents) => {
+  //
+  // Note: to sort an array need to do: Array.from(s).sort()
+  //
+  render_control_plane = (cp_name, cp_topology) => {
+    let num_clusters = 0;
+    let num_resources = 0;
+    let num_load_balancers = 0;
+
+    let service_list = new Set();
+    let cp_zones = new Set();
+
+    if ('clusters' in cp_topology) {
+      const clusters = cp_topology['clusters']);
+      num_clusters = Object.keys(clusters).length;
+
+      for (const [name, data] of Object.entries(clusters)) {
+        for (const zone in data['failure_zones'] || {} {
+          cp_zones.add(zone);
+          service_list
+        }
+      }
+    }
+
+    if ('resources' in cp_topology) {
+      num_resources = Object.keys(cp_topology['resources']).length;
+    }
+
+    if ('load-balancers' in cp_topology) {
+      num_resources = Object.keys(cp_topology['load-balancers']).length;
+    }
+
+
+    return (
+      <div key={cp_name}>
+        <a name={cp_name} />
+        <h2>{cp_name}</h2>
+        <table>
+          <thead><tr>
+            <th colSpan={num_clusters}>Clusters</th>
+            <th colSpan={num_resources}>Resources</th>
+            <th colSpan={num_load_balancers}>Load Balancers</th>
+          </tr></thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+   );
   }
 
   render () {
@@ -50,9 +96,8 @@ class CloudModelSummary extends BaseWizardPage {
     let control_planes = undefined;
 
     if (this.state.controlPlane) {
-      control_planes = Object.keys(this.state.controlPlane['control_planes']).sort().map((name) =>
-        <div><h2>{name}</h2></div>
-      );
+      control_planes = Object.keys(this.state.controlPlane['control_planes']).sort().map(name =>
+        this.render_control_plane(name, this.state.controlPlane['control_planes'][name]));
     }
 
     return (
