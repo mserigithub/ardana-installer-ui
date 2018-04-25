@@ -87,8 +87,7 @@ class CloudModelSummary extends BaseWizardPage {
     const resources = cp_topology['resources'] || {};
     const load_balancers = cp_topology['load-balancers'] || {};
 
-    // Can generalize this logic
-
+    // Gather info about each cluster
     num_clusters = Object.keys(clusters).length;
     let cluster_names = [];
     for (const [name, data] of Object.entries(clusters)) {
@@ -102,6 +101,7 @@ class CloudModelSummary extends BaseWizardPage {
     }
     cluster_names.sort();
 
+    // Gather info about each resource
     num_resources = Object.keys(resources).length;
     let resource_names = [];
     for (const [name, data] of Object.entries(resources)) {
@@ -115,6 +115,7 @@ class CloudModelSummary extends BaseWizardPage {
     }
     resource_names.sort();
 
+    // Gather info about each load balancer
     num_load_balancers = Object.keys(load_balancers).length;
     let lb_names = [];
     for (const [name, data] of Object.entries(load_balancers)) {
@@ -128,6 +129,13 @@ class CloudModelSummary extends BaseWizardPage {
     }
     lb_names.sort();
 
+    // Generate the header with names
+    const names = cluster_names.map(name => <th>{name}</th>).concat(
+      resource_names.map(name => <th>{name}</th>)).concat(
+      lb_names.map(name => <th>{name}</th>));
+
+
+    // Generate the list of services
     const list_separately = ['foundation', 'clients', 'ardana'];
     const separate_set = new Set(this.list_separately);
 
@@ -137,11 +145,17 @@ class CloudModelSummary extends BaseWizardPage {
       [...services].filter(x => !separate_set.has(x))
     )).concat(list_separately);
 
-    const names = cluster_names.map(name => <th>{name}</th>).concat(
-      resource_names.map(name => <th>{name}</th>)).concat(
-      lb_names.map(name => <th>{name}</th>));
+    let service_rows = [];
 
+    for (const service of service_list) {
+      const cells = [<td />]
+        .concat(cluster_names.map(name => clusters[name]['services'][service] ? <td>{service}</td> : ''))
+        .concat(resource_names.map(name => resources[name]['services'][service] ? <td>{service}</td> : ''));
 
+      service_rows.push(<tr>{cells}</tr>);
+    }
+
+    // Generate the zone rows
     const zone_rows = Array.from(cp_zones).sort().map(zone => {
       const cluster_servers = Object.values(clusters).map(cluster =>
         this.render_servers(cluster['failure_zones'][zone] || [])
@@ -172,6 +186,7 @@ class CloudModelSummary extends BaseWizardPage {
           </tr></thead>
           <tbody>
             <tr><td>&nbsp;</td>{names}</tr>
+            {service_rows}
             {zone_rows}
           </tbody>
         </table>
@@ -186,6 +201,8 @@ class CloudModelSummary extends BaseWizardPage {
       this.init();
       control_planes = Object.keys(this.control_planes).sort().map(name =>
         this.render_control_plane(name, this.control_planes[name]));
+    } else {
+      control_planes = 'Loading...';
     }
 
     return (
