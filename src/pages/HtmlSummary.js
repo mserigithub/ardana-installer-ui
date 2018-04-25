@@ -76,9 +76,6 @@ class CloudModelSummary extends BaseWizardPage {
   }
 
   render_control_plane = (cp_name, cp_topology) => {
-    let num_clusters = 0;
-    let num_resources = 0;
-    let num_load_balancers = 0;
 
     let services = new Set();
     let cp_zones = new Set();
@@ -88,7 +85,7 @@ class CloudModelSummary extends BaseWizardPage {
     const load_balancers = cp_topology['load-balancers'] || {};
 
     // Gather info about each cluster
-    num_clusters = Object.keys(clusters).length;
+    const num_clusters = Object.keys(clusters).length;
     let cluster_names = [];
     for (const [name, data] of Object.entries(clusters)) {
       for (const zone in data['failure_zones'] || {}) {
@@ -102,7 +99,7 @@ class CloudModelSummary extends BaseWizardPage {
     cluster_names.sort();
 
     // Gather info about each resource
-    num_resources = Object.keys(resources).length;
+    const num_resources = Object.keys(resources).length;
     let resource_names = [];
     for (const [name, data] of Object.entries(resources)) {
       for (const zone in data['failure_zones'] || {}) {
@@ -116,7 +113,7 @@ class CloudModelSummary extends BaseWizardPage {
     resource_names.sort();
 
     // Gather info about each load balancer
-    num_load_balancers = Object.keys(load_balancers).length;
+    const num_load_balancers = Object.keys(load_balancers).length;
     let lb_names = [];
     for (const [name, data] of Object.entries(load_balancers)) {
       for (const zone in data['failure_zones'] || {}) {
@@ -134,23 +131,21 @@ class CloudModelSummary extends BaseWizardPage {
       resource_names.map(name => <th>{name}</th>)).concat(
       lb_names.map(name => <th>{name}</th>));
 
-
-    // Generate the list of services
-    const list_separately = ['foundation', 'clients', 'ardana'];
-    const separate_set = new Set(this.list_separately);
-
     // Create a sorted list of those items in the services set, with the items in
     // list_separately placed at the end of the list
-    const service_list = Array.from(new Set(
-      [...services].filter(x => !separate_set.has(x))
-    )).concat(list_separately);
+    const list_separately = ['foundation', 'clients', 'ardana'];
+    for (const item of list_separately) {
+      services.delete(item);
+    }
+    const service_list = Array.from(new Set([...services])).concat(list_separately);
 
     let service_rows = [];
 
     for (const service of service_list) {
       const cells = [<td />]
-        .concat(cluster_names.map(name => clusters[name]['services'][service] ? <td>{service}</td> : ''))
-        .concat(resource_names.map(name => resources[name]['services'][service] ? <td>{service}</td> : ''));
+        .concat(cluster_names.map(name => clusters[name]['services'][service] ? <td>{service}</td> : <td/>))
+        .concat(resource_names.map(name => resources[name]['services'][service] ? <td>{service}</td> : <td/>))
+        .concat(lb_names.map(name => load_balancers[name]['services'][service] ? <td>{service}</td> : <td/>));
 
       service_rows.push(<tr>{cells}</tr>);
     }
