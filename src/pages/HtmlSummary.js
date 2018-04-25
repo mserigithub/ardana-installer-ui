@@ -139,8 +139,8 @@ class CloudModelSummary extends BaseWizardPage {
     }
     const service_list = Array.from(new Set([...services])).concat(list_separately);
 
+    // Generate the rows containing service names
     let service_rows = [];
-
     for (const service of service_list) {
       const cells = [<td />]
         .concat(cluster_names.map(name => clusters[name]['services'][service] ? <td>{service}</td> : <td/>))
@@ -149,6 +149,23 @@ class CloudModelSummary extends BaseWizardPage {
 
       service_rows.push(<tr>{cells}</tr>);
     }
+
+    // Generate the rows containing load balancer name/saddresses
+    let cells = [<td />]
+      .concat(cluster_names.map(name => <td/>))
+      .concat(resource_names.map(name => <td/>))
+      .concat(lb_names.map(name => load_balancers[name]['external-name'] ?
+        <td>{load_balancers[name]['external-name']}</td> : <td/>));
+    const lb_name_row = (<tr>{cells}</tr>);
+
+    cells = [<td />]
+      .concat(cluster_names.map(name => <td/>))
+      .concat(resource_names.map(name => <td/>))
+      .concat(lb_names.map(name => load_balancers[name]['address'] ?
+        <td><a href={'Networks.html#'+load_balancers[name]['network']}>{load_balancers[name]['address']}</a></td> :
+        <td/>));
+    const lb_address_row = (<tr>{cells}</tr>);
+
 
     // Generate the zone rows
     const zone_rows = Array.from(cp_zones).sort().map(zone => {
@@ -182,6 +199,8 @@ class CloudModelSummary extends BaseWizardPage {
           <tbody>
             <tr><td>&nbsp;</td>{names}</tr>
             {service_rows}
+            {lb_name_row}
+            {lb_address_row}
             {zone_rows}
           </tbody>
         </table>
