@@ -68,9 +68,9 @@ class CloudModelSummary extends BaseWizardPage {
       return (<td>&nbsp;</td>);
     }
 
+    // Example of creating a link to another page. Probably don't want to do this for real
     const hosts = servers.map(server => {
-      const href = 'Servers/' + this.server_by_hostname[server]['id'] + '.html';
-      return (<div><a href={href}>{server}</a></div>);
+      return (<div><a href={'Servers/' + this.server_by_hostname[server]['id'] + '.html'}>{server}</a></div>);
     });
     return (<td>{hosts}</td>);
   }
