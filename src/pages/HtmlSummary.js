@@ -22,7 +22,7 @@ import BaseWizardPage from './BaseWizardPage.js';
  * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
  * in the config processor
  */
-class CloudModelSummary extends BaseWizardPage {
+class HtmlSummary extends BaseWizardPage {
   constructor(props) {
     super(props);
 
@@ -238,4 +238,4 @@ class CloudModelSummary extends BaseWizardPage {
   }
 }
 
-export default CloudModelSummary;
+export default HtmlSummary;
