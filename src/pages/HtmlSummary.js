@@ -17,6 +17,11 @@ import '../Deployer.css';
 import { fetchJson } from '../utils/RestUtils.js';
 import BaseWizardPage from './BaseWizardPage.js';
 
+/*
+ * This class is a JavaScript implementation of the script
+ * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
+ * in the config processor
+ */
 class CloudModelSummary extends BaseWizardPage {
   constructor(props) {
     super(props);
@@ -222,7 +227,7 @@ class CloudModelSummary extends BaseWizardPage {
     return (
       <div className='wizard-page'>
         <div className='content-header'>
-          {this.renderHeading('Control Plane')}
+          {this.renderHeading('Control Planes')}
         </div>
         <div className='wizard-content'>
           {control_planes}
