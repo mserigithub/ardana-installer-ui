@@ -314,8 +314,8 @@ class NicMappingTab extends Component {
 
     let addClass = 'material-icons add-button';
     let addTextClass = 'add-text';
-    let editClass = 'glyphicon glyphicon-pencil edit-button';
-    let removeClass = 'glyphicon glyphicon-trash remove-button';
+    let editClass = 'material-icons edit-button';
+    let removeClass = 'material-icons remove-button';
     if (this.state.mode != MODE.NONE) {
       addClass += ' disabled';
       addTextClass += ' disabled';
@@ -338,10 +338,14 @@ class NicMappingTab extends Component {
             <td>{numPorts}</td>
             <td>
               <div className='row-action-container'>
-                <span className={editClass}
-                  onClick={(e) => this.editNicMapping(e, idx)} />
-                <span className={removeClass}
-                  onClick={(e) => this.setState({activeRow: idx, showRemoveConfirmation: true})} />
+                <span
+                  onClick={(e) => this.editNicMapping(e, idx)}>
+                    <i className={editClass}>edit</i>
+                </span>
+                <span
+                  onClick={(e) => this.setState({activeRow: idx, showRemoveConfirmation: true})}>
+                    <i className={removeClass}>delete</i>
+                </span>
               </div>
             </td>
           </tr>);

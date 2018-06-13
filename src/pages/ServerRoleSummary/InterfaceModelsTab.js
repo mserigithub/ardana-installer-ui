@@ -156,8 +156,8 @@ class InterfaceModelsTab extends Component {
   render() {
     let addClass = 'material-icons add-button';
     let addTextClass = 'add-text';
-    let editClass = 'glyphicon glyphicon-pencil edit-button';
-    let removeClass = 'glyphicon glyphicon-trash remove-button';
+    let editClass = 'material-icons edit-button';
+    let removeClass = 'material-icons remove-button';
     if (this.state.overallMode != MODE.NONE) {
       addClass += ' disabled';
       addTextClass += ' disabled';
@@ -184,10 +184,14 @@ class InterfaceModelsTab extends Component {
             <td>{numInterfaces}</td>
             <td>
               <div className='row-action-container'>
-                <span className={editClass}
-                  onClick={(e) => this.editModel(e, idx)} />
-                <span className={removeClass}
-                  onClick={(e) => this.setState({activeOverallRow: idx, showRemoveConfirmation: true})} />
+                <span
+                  onClick={(e) => this.editModel(e, idx)}>
+                  <i className={editClass}>edit</i>
+                </span>
+                <span
+                  onClick={(e) => this.setState({activeOverallRow: idx, showRemoveConfirmation: true})}>
+                  <i className={removeClass}>delete</i>
+                </span>
               </div>
             </td>
           </tr>);
@@ -420,18 +424,22 @@ class InterfaceModelsTab extends Component {
 
         let minus, edit;
         //if (idx === arr.size-1 && this.state.deviceList.get(idx).get('name')) {
-        let editClass = 'glyphicon glyphicon-pencil edit-button left-sign';
-        let minusClass = 'glyphicon glyphicon-trash right-sign';
+        let editClass = 'material-icons edit-button left-sign';
+        let minusClass = 'material-icons right-sign';
         if (this.state.detailMode !== MODE.NONE) {
           editClass += ' disabled';
           minusClass += ' disabled';
         }
-        edit = (<span key='edit' className={editClass}
-          onClick={(e) => this.editInterface(e, idx)}/>);
+        edit = (<span key='edit'
+          onClick={(e) => this.editInterface(e, idx)}>
+            <i className={editClass}>edit</i>
+          </span>);
         //}
         //if (idx > 0 || this.state.deviceList.get(idx).get('name')) {
-        minus = (<span key='remove' className={minusClass}
-          onClick={(e) => this.confirmRemoveInterface(idx)}/>);
+        minus = (<span key='remove'
+          onClick={(e) => this.confirmRemoveInterface(idx)}>
+            <i className={minusClass}>delete</i>
+          </span>);
         //}
 
         return (

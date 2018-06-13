@@ -134,10 +134,14 @@ class CollapsibleTable extends Component {
 
     cols.push(
       <td key='action-buttons'>
-        <span className='glyphicon glyphicon-pencil edit collapsible'
-          onClick={() => this.handleShowEditServer(server)}/>
-        <span className='glyphicon glyphicon-info-sign detail-info collapsible'
-          onClick={() => this.handleShowServerDetails(server)}/>
+        <span className='edit collapsible'
+          onClick={() => this.handleShowEditServer(server)}>
+            <i className="material-icons collapsible">edit</i>
+        </span>
+        <span className="detail-info collapsible"
+          onClick={() => this.handleShowServerDetails(server)}>
+            <i className="material-icons collapsible">info</i>
+        </span>
       </td>
     );
     return cols;
@@ -147,6 +151,8 @@ class CollapsibleTable extends Component {
     let groupCountColClassName = 'expand-collapse-icon ';
     groupCountColClassName += group.isExpanded ? 'glyphicon glyphicon-menu-up' :
       'glyphicon glyphicon-menu-down';
+  // TODO, make this a material icons element instead
+    let icon = group.isExpanded ? 'expand_more' : 'expand_less';
 
     let fillerTds = [];
     for (let i=0; i<Object.keys(group.members[0]).length - 7; i++) {
@@ -162,7 +168,7 @@ class CollapsibleTable extends Component {
       {fillerTds}
       <td></td>
       <td className='group-count-col'>{group.members.length}
-        <span className={groupCountColClassName}></span></td></tr>];
+        <span className='expand-collapse-icon'><i className='material-icons'>{icon}</i></span></td></tr>];
     group.members.forEach((member) => {
       let cols = this.renderServerDataCols(member);
       let memberRowClassName = 'member-row';
